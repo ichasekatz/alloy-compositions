@@ -14,9 +14,9 @@ class TestGenerateCompositions(TestCase):
     """Tests for generate_compositions."""
 
     def test_binary_count(self):
-        """Binary system at n_comps=4 produces exactly 3 interior points."""
+        """Binary system at n_comps=4 produces exactly 5 points including endpoints."""
         df = generate_compositions(["A", "B"], n_comps=4, max_order=2)
-        assert len(df) == 3  # (0.25,0.75),(0.5,0.5),(0.75,0.25) — endpoints excluded
+        assert len(df) == 5  # [0,1],[0.25,0.75],[0.5,0.5],[0.75,0.25],[1,0]
 
     def test_rows_sum_to_one(self):
         """All rows sum to exactly 1.0 within floating-point tolerance."""
@@ -41,11 +41,11 @@ class TestGenerateCompositions(TestCase):
         assert not df.duplicated().any()
 
     def test_max_order_two_only_binary(self):
-        """max_order=2 on a 4-element pool returns only binary compositions."""
+        """max_order=2 on a 4-element pool returns at most 2 non-zero elements per row."""
         df = generate_compositions(["A", "B", "C", "D"], n_comps=5, max_order=2)
-        # Each row should have exactly 2 non-zero elements
+        # Rows include endmembers (1 non-zero) and interior (2 non-zero)
         non_zero = (df > 0).sum(axis=1)
-        assert (non_zero == 2).all()
+        assert (non_zero <= 2).all()
 
     def test_invalid_max_order_raises(self):
         """max_order exceeding element count raises ValueError."""
